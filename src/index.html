@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tauri App</title>
+    <script type="module" src="/main.js" defer></script>
+  </head>
+
+  <body>
+    <!-- 新增容器，包含复选框、搜索框和按钮 -->
+    <div class="controls-container">
+      <!-- 全链接复选框 -->
+      <div class="full-link-container">
+        <input type="checkbox" id="full-link" class="full-link-checkbox" />
+        <label for="full-link" class="full-link-label">Full Link</label>
+      </div>
+
+      <!-- 搜索输入框 -->
+      <div class="search-container">
+        <input 
+          type="text" 
+          class="search-input" 
+          placeholder="Search" 
+          aria-label="Search"
+        />
+      </div>
+
+      <!-- 新增Copy按钮 -->
+      <button class="copy-button" type="button">
+        Copy
+      </button>
+    </div>
+
+    <!-- 文件表格 -->
+    <div class="table-container">
+      <table class="files-table">
+        <thead>
+          <tr>
+            <th class="column-files">Files</th>
+            <th class="column-path">Path</th>
+            <th class="column-link">Link</th>
+          </tr>
+        </thead>
+        <tbody class="table-body">
+          <!-- 表格行将通过JavaScript动态添加 -->
+        </tbody>
+      </table>
+    </div>
+  </body>
+</html>
