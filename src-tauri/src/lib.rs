@@ -1,6 +1,6 @@
 use magnet_url::{Magnet, MagnetBuilder};
 use rs_torrent_magnet::magnet_from_torrent_file;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 use tauri::{AppHandle, Emitter};
 
@@ -70,6 +70,23 @@ async fn torrent_to_magnet(app: AppHandle, path_list: Vec<String>, full_link: bo
     }
 }
 
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct TableContents {
+    name: String,
+    path: String,
+    link: String,
+    id: f64
+}
+
+#[tauri::command(rename_all = "snake_case")]
+fn filter_data(table_data: Vec<TableContents>, keyword: String) -> Vec<TableContents> {
+    let keyword_lower = keyword.trim().to_lowercase();
+    table_data.into_iter()
+        .filter(|item| item.link.to_lowercase().contains(&keyword_lower))
+        .collect()
+}
+
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 struct TorrentInfo {
@@ -84,7 +101,6 @@ fn send_torrent_to_frontend(
     path: String,
     link: String,
 ) -> Result<(), tauri::Error> {
-    //println!("{}", path);
     app.emit("send_torrent", TorrentInfo { name, path, link })
 }
 
@@ -93,7 +109,11 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, torrent_to_magnet])
+        .invoke_handler(tauri::generate_handler![
+            greet,
+            torrent_to_magnet,
+            filter_data
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

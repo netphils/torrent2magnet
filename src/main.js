@@ -32,7 +32,7 @@ async function initializeDragAndDrop() {
         // 文件悬停在页面上方
         //console.log('User hovering at position:', event.payload.position);
         
-        // 在这里添加视觉反馈（可选）
+        // 在这里添加视觉反馈
         document.body.classList.add('drag-over');
       } 
       else if (event.payload.type === 'drop') {
@@ -159,7 +159,7 @@ function setupCopyButton() {
     
     // 调用Tauri2 API进行复制
     writeText(linksString).then(() => {
-      // 可选：显示复制成功提示
+      // 显示复制成功提示
       showNotification(`已复制 ${visibleRows.length} 个链接到剪贴板`);
     })
     .catch((error) => {
@@ -174,43 +174,56 @@ function setupSearchInput() {
   if (!searchInput) return;
   
   searchInput.addEventListener('input', (event) => {
-    const searchTerm = event.target.value.trim().toLowerCase();
+    const searchTerm = event.target.value.trim();
     renderTable(searchTerm);
   });
 }
 
 // 渲染表格
-function renderTable(searchTerm = '') {
+async function renderTable(searchTerm = '') {
   const tbody = document.querySelector('.table-body');
   if (!tbody) return;
   
   // 清空现有行
   tbody.innerHTML = '';
   
-  // 过滤数据
-  const filteredData = searchTerm 
-    ? tableData.filter(row => 
-        row.link.toLowerCase().includes(searchTerm)
-      )
-    : tableData;
-  
-  // 如果没有数据，显示空状态
-  if (filteredData.length === 0) {
-    const emptyRow = document.createElement('tr');
-    emptyRow.innerHTML = `
-      <td colspan="3" class="empty-message">
-        ${searchTerm ? '没有找到匹配的链接' : '暂无数据'}
+  try {
+    // 从后端获取过滤后的数据
+    const filteredData = searchTerm ? await invoke('filter_data', {
+      table_data: tableData,
+      keyword: searchTerm
+    }):
+    tableData;
+    
+    // 如果没有数据，显示空状态
+    if (filteredData.length === 0) {
+      const emptyRow = document.createElement('tr');
+      emptyRow.innerHTML = `
+        <td colspan="3" class="empty-message">
+          ${searchTerm ? '没有找到匹配的链接' : '暂无数据'}
+        </td>
+      `;
+      tbody.appendChild(emptyRow);
+      return;
+    }
+    
+    // 添加新行
+    filteredData.forEach(rowData => {
+      const row = createTableRow(rowData);
+      tbody.appendChild(row);
+    });
+    
+  } catch (error) {
+    console.error('渲染表格失败:', error);
+    // 显示错误信息
+    const errorRow = document.createElement('tr');
+    errorRow.innerHTML = `
+      <td colspan="3" class="error-message">
+        加载数据失败，请稍后重试
       </td>
     `;
-    tbody.appendChild(emptyRow);
-    return;
+    tbody.appendChild(errorRow);
   }
-  
-  // 添加新行
-  filteredData.forEach(rowData => {
-    const row = createTableRow(rowData);
-    tbody.appendChild(row);
-  });
 }
 
 // 创建表格行
@@ -331,7 +344,7 @@ function clearTable() {
     tbody.innerHTML = '';
   }
   
-  // 可选：清空搜索框
+  // 清空搜索框
   const searchInput = document.querySelector('.search-input');
   if (searchInput) {
     searchInput.value = '';
