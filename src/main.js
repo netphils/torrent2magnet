@@ -160,10 +160,10 @@ function setupCopyButton() {
     // 调用Tauri2 API进行复制
     writeText(linksString).then(() => {
       // 显示复制成功提示
-      showNotification(`已复制 ${visibleRows.length} 个链接到剪贴板`);
+      showNotification(`Copied ${visibleRows.length} Links to Clipboard`);
     })
     .catch((error) => {
-      showNotification('复制失败: ' + error.message);
+      showNotification('Copy Failed: ' + error.message);
     });
   });
 }
@@ -208,7 +208,7 @@ async function renderTable(searchTerm = '') {
       const emptyRow = document.createElement('tr');
       emptyRow.innerHTML = `
         <td colspan="3" class="empty-message">
-          ${searchTerm ? '没有找到匹配的链接' : '暂无数据'}
+          ${searchTerm ? '0 Matching Links Found' : 'No Data'}
         </td>
       `;
       tbody.appendChild(emptyRow);
@@ -227,7 +227,7 @@ async function renderTable(searchTerm = '') {
     const errorRow = document.createElement('tr');
     errorRow.innerHTML = `
       <td colspan="3" class="error-message">
-        加载数据失败，请稍后重试
+        Error Loading Data
       </td>
     `;
     tbody.appendChild(errorRow);
@@ -306,7 +306,8 @@ function showNotification(message) {
   notification.style.cssText = `
     position: fixed;
     top: 20px;
-    right: 20px;
+    left: 50%;
+    transform: translateX(-50%);
     background: #4CAF50;
     color: white;
     padding: 12px 20px;
@@ -321,10 +322,10 @@ function showNotification(message) {
     style.id = 'notification-styles';
     style.textContent = `
       @keyframes fadeInOut {
-        0% { opacity: 0; transform: translateY(-20px); }
-        15% { opacity: 1; transform: translateY(0); }
-        85% { opacity: 1; transform: translateY(0); }
-        100% { opacity: 0; transform: translateY(-20px); }
+        0% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+        100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
       }
     `;
     document.head.appendChild(style);
