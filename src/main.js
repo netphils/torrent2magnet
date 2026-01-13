@@ -16,13 +16,6 @@ async function greet() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  /*greetInputEl = document.querySelector("#greet-input");
-  greetMsgEl = document.querySelector("#greet-msg");
-  document.querySelector("#greet-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    greet();
-  });*/
-
   initializeEventListeners();
   setupDetectionListener();
   setupCopyButton();
@@ -85,7 +78,7 @@ function handleDroppedFiles(filePaths) {
   // 调用后端API
   invoke('torrent_to_magnet', {path_list: filePaths, full_link: checkbox.checked});
   
-  // 占位：仅打印文件路径
+  // 调试：仅打印文件路径
   filePaths.forEach((path, index) => {
     console.log(`File ${index + 1}: ${path}`);
   });
@@ -255,7 +248,7 @@ function createTableRow(data) {
   return row;
 }
 
-// 获取所有可见行（考虑搜索过滤）
+// 获取所有可见行
 function getVisibleRows() {
   const tbody = document.querySelector('.table-body');
   if (!tbody) return [];
@@ -277,7 +270,7 @@ function getVisibleRows() {
   return visibleRows;
 }
 
-// 显示通知（可选功能）
+// 显示通知
 function showNotification(message) {
   // 移除已存在的通知
   const existingNotification = document.querySelector('.notification');
@@ -347,7 +340,7 @@ function clearTable() {
   console.log('表格已清空');
 }
 
-// 清理函数（如果需要的话）
+// 清理函数
 function cleanup() {
   if (cleanupDetectionStarted) {
     cleanupDetectionStarted();
