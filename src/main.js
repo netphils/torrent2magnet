@@ -78,7 +78,7 @@ function handleDroppedFiles(filePaths) {
   // 调用后端API
   invoke('torrent_to_magnet', {path_list: filePaths, full_link: checkbox.checked});
   
-  // 调试：仅打印文件路径
+  // 调试：打印文件路径
   filePaths.forEach((path, index) => {
     console.log(`File ${index + 1}: ${path}`);
   });
@@ -173,9 +173,17 @@ function setupSearchInput() {
   const searchInput = document.querySelector('.search-input');
   if (!searchInput) return;
   
+  let debounceTimer;
+  
   searchInput.addEventListener('input', (event) => {
-    const searchTerm = event.target.value.trim();
-    renderTable(searchTerm);
+    // 清除之前的定时器
+    clearTimeout(debounceTimer);
+    
+    // 设置新的定时器
+    debounceTimer = setTimeout(() => {
+      const searchTerm = event.target.value.trim();
+      renderTable(searchTerm);
+    }, 300); // 300毫秒延迟
   });
 }
 
