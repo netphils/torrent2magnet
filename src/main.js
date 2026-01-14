@@ -171,25 +171,35 @@ function setupCopyButton() {
 // 设置搜索输入框
 function setupSearchInput() {
   const searchInput = document.querySelector('.search-input');
-  if (!searchInput) return;
+  const searchTypeSelect = document.getElementById('search-type');
+  
+  if (!searchInput || !searchTypeSelect) return;
   
   let debounceTimer;
   
-  searchInput.addEventListener('input', (event) => {
-    // 清除之前的定时器
+  // 文本框输入处理
+  searchInput.addEventListener('input', () => {
     clearTimeout(debounceTimer);
     
-    // 设置新的定时器
     debounceTimer = setTimeout(() => {
-      const searchTerm = event.target.value.trim();
-      renderTable(searchTerm);
-    }, 300); // 300毫秒延迟
+      const searchTerm = searchInput.value.trim();
+      const searchType = searchTypeSelect.value;
+      renderTable(searchTerm, searchType);
+    }, 300);
+  });
+  
+  // 下拉框变化处理
+  searchTypeSelect.addEventListener('change', () => {
+    const searchTerm = searchInput.value.trim();
+    const searchType = searchTypeSelect.value;
+    renderTable(searchTerm, searchType);
   });
 }
 
 // 渲染表格
-async function renderTable(searchTerm = '') {
+async function renderTable(searchTerm = '', searchType = '') {
   const tbody = document.querySelector('.table-body');
+  
   if (!tbody) return;
   
   // 清空现有行
@@ -199,7 +209,8 @@ async function renderTable(searchTerm = '') {
     // 从后端获取过滤后的数据
     const filteredData = searchTerm ? await invoke('filter_data', {
       table_data: tableData,
-      keyword: searchTerm
+      keyword: searchTerm,
+      search_type: searchType
     }):
     tableData;
     

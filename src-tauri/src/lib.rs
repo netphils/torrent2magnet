@@ -80,11 +80,21 @@ struct TableContents {
 }
 
 #[tauri::command(rename_all = "snake_case")]
-fn filter_data(table_data: Vec<TableContents>, keyword: String) -> Vec<TableContents> {
+fn filter_data(table_data: Vec<TableContents>, keyword: String, search_type: String) -> Vec<TableContents> {
     let keyword_lower = keyword.trim().to_lowercase();
-    table_data.into_iter()
-        .filter(|item| item.link.to_lowercase().contains(&keyword_lower))
-        .collect()
+    if keyword_lower.is_empty() {
+        return table_data; // 如果关键词为空，返回所有数据
+    }
+
+    match search_type.as_str() {
+        "link" => table_data.into_iter()
+            .filter(|item| item.link.to_lowercase().contains(&keyword_lower))
+            .collect(),
+        "name" => table_data.into_iter()
+            .filter(|item| item.name.to_lowercase().contains(&keyword_lower))
+            .collect(),
+        _ => table_data, // 未知搜索类型则返回全部
+    }
 }
 
 #[derive(Clone, Serialize)]
