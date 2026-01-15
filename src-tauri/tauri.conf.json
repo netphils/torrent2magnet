@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "torrent2magnet",
-  "version": "0.1.1",
-  "identifier": "com.torrent2magnet.app",
+  "version": "0.1.2",
+  "identifier": "info.netsh.torrent2magnet.myapp",
   "build": {
     "frontendDist": "../src"
   },

@@ -2,10 +2,12 @@ const { invoke } = window.__TAURI__.core;
 const { getCurrentWebview } = window.__TAURI__.webview;
 const { listen } = window.__TAURI__.event;
 const { writeText } = window.__TAURI__.clipboardManager;
+const { Store } = window.__TAURI__.store;
 
 // 监听器清理函数
 let cleanupDetectionStarted = null;
 let tableData = []; // 存储所有表格数据
+let t2mcfg;
 
 let greetInputEl;
 let greetMsgEl;
@@ -16,11 +18,73 @@ async function greet() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  // 读取配置
+  loadConfig()
+  
   initializeEventListeners();
   setupDetectionListener();
   setupCopyButton();
   setupSearchInput();
+  // 初始化拖拽监听
+  initializeDragAndDrop();
+  // 添加CSS类用于拖拽状态
+  addDragDropStyles();
 });
+
+async function loadConfig() {
+  t2mcfg = await Store.load('configs.json');
+  const val = await t2mcfg.get('full-link');
+
+  const checkbox = document.getElementById('full-link');
+  if(val.checked) {
+    checkbox.checked = true;
+  }
+  else {
+    checkbox.checked = false;
+  }
+  setupFullLinkCheckboxListener();
+}
+
+// 修改full-link checkbox触发保存
+function setupFullLinkCheckboxListener() {
+  const checkbox = document.getElementById('full-link');
+
+  // checkbox改变触发rust重新处理链接
+  checkbox.addEventListener('change', async function(event) {
+    const isChecked = event.target.checked;
+    
+    // 禁用checkbox防止重复操作
+    checkbox.disabled = true;
+
+    // 保存checkbox状态
+    await t2mcfg.set('full-link', {checked: isChecked});
+    
+    // 重新处理torrents
+    if(tableData.length > 0) {
+      try {
+        console.log(`Checkbox state changed to: ${isChecked}`);
+        
+        const filePaths = tableData.map(item => item.path);
+        
+        clearTable(); // 清空目前的表格
+        // 调用后端处理
+        invoke('torrent_to_magnet', {path_list: filePaths, full_link: isChecked});
+        
+        // 后端处理完成后的逻辑
+        console.log('Backend processing completed');
+        
+      } catch (error) {
+        console.error('Backend processing failed:', error);
+        // 如果失败，恢复原来的选中状态
+        checkbox.checked = !isChecked;
+      } finally {
+        // 无论成功失败，都重新启用checkbox
+        checkbox.disabled = false;
+        console.log('Checkbox re-enabled');
+      }
+    }
+  });
+}
 
 async function initializeDragAndDrop() {
   try {
@@ -83,15 +147,6 @@ function handleDroppedFiles(filePaths) {
     console.log(`File ${index + 1}: ${path}`);
   });
 }
-
-// 初始化拖拽功能
-document.addEventListener('DOMContentLoaded', () => {
-  // 初始化拖拽监听
-  initializeDragAndDrop();
-  
-  // 添加CSS类用于拖拽状态
-  addDragDropStyles();
-});
 
 // 添加拖拽相关的样式
 function addDragDropStyles() {

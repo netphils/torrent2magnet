@@ -76,21 +76,27 @@ struct TableContents {
     name: String,
     path: String,
     link: String,
-    id: f64
+    id: f64,
 }
 
 #[tauri::command(rename_all = "snake_case")]
-fn filter_data(table_data: Vec<TableContents>, keyword: String, search_type: String) -> Vec<TableContents> {
+fn filter_data(
+    table_data: Vec<TableContents>,
+    keyword: String,
+    search_type: String,
+) -> Vec<TableContents> {
     let keyword_lower = keyword.trim().to_lowercase();
     if keyword_lower.is_empty() {
         return table_data; // 如果关键词为空，返回所有数据
     }
 
     match search_type.as_str() {
-        "link" => table_data.into_iter()
+        "link" => table_data
+            .into_iter()
             .filter(|item| item.link.to_lowercase().contains(&keyword_lower))
             .collect(),
-        "name" => table_data.into_iter()
+        "name" => table_data
+            .into_iter()
             .filter(|item| item.name.to_lowercase().contains(&keyword_lower))
             .collect(),
         _ => table_data, // 未知搜索类型则返回全部
@@ -117,6 +123,7 @@ fn send_torrent_to_frontend(
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
