@@ -18,17 +18,13 @@ async function greet() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  // 读取配置
-  loadConfig()
-  
+  loadConfig().then(setupFullLinkCheckboxListener()); // 读取配置并设置监听保存
   initializeEventListeners();
   setupDetectionListener();
   setupCopyButton();
   setupSearchInput();
-  // 初始化拖拽监听
-  initializeDragAndDrop();
-  // 添加CSS类用于拖拽状态
-  addDragDropStyles();
+  initializeDragAndDrop(); // 初始化拖拽监听
+  addDragDropStyles(); // 添加CSS类用于拖拽状态
 });
 
 async function loadConfig() {
@@ -42,7 +38,6 @@ async function loadConfig() {
   else {
     checkbox.checked = false;
   }
-  setupFullLinkCheckboxListener();
 }
 
 // 修改full-link checkbox触发保存
@@ -65,7 +60,7 @@ function setupFullLinkCheckboxListener() {
         console.log(`Checkbox state changed to: ${isChecked}`);
         
         const filePaths = tableData.map(item => item.path);
-        
+
         clearTable(); // 清空目前的表格
         // 调用后端处理
         invoke('torrent_to_magnet', {path_list: filePaths, full_link: isChecked});
