@@ -47,15 +47,14 @@ function setupFullLinkCheckboxListener() {
   // checkbox改变触发rust重新处理链接
   checkbox.addEventListener('change', async function(event) {
     const isChecked = event.target.checked;
-    
-    // 禁用checkbox防止重复操作
-    checkbox.disabled = true;
 
     // 保存checkbox状态
     await t2mcfg.set('full-link', {checked: isChecked});
     
     // 重新处理torrents
     if(tableData.length > 0) {
+      // 禁用checkbox防止重复操作
+      checkbox.disabled = true;
       try {
         console.log(`Checkbox state changed to: ${isChecked}`);
         
@@ -66,12 +65,10 @@ function setupFullLinkCheckboxListener() {
         invoke('torrent_to_magnet', {path_list: filePaths, full_link: isChecked});
         
         // 后端处理完成后的逻辑
-        console.log('Backend processing completed');
+        console.log('Rust backend processing completed');
         
       } catch (error) {
-        console.error('Backend processing failed:', error);
-        // 如果失败，恢复原来的选中状态
-        checkbox.checked = !isChecked;
+        console.error('Rust backend processing failed:', error);
       } finally {
         // 无论成功失败，都重新启用checkbox
         checkbox.disabled = false;
